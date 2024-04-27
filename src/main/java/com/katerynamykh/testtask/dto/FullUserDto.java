@@ -1,6 +1,5 @@
 package com.katerynamykh.testtask.dto;
 
-import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record FullUserDto(
@@ -10,7 +9,6 @@ public record FullUserDto(
         String lastName,
         LocalDate birthDate,
         String address,
-        @Pattern(regexp = "\\+??\\d{12}|\\d{10}", message = "Phone number should be valid")
         String phoneNumber) {
 
 }
