@@ -12,6 +12,7 @@ import java.time.Period;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    FullUserDto create(@Valid @RequestBody CreateUserDto userDto) {
+    FullUserDto create(@RequestBody @Valid CreateUserDto userDto) {
         ageValidation(userDto);
         return mapper.toDto(repository.save(mapper.toModel(userDto)));
     }
@@ -52,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    FullUserDto update(@PathVariable Long id, @Valid @RequestBody CreateUserDto userDto) {
+    FullUserDto update(@PathVariable Long id, @RequestBody @Valid CreateUserDto userDto) {
         repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "User not found by id " + id));
         ageValidation(userDto);
@@ -68,14 +69,16 @@ public class UserController {
     }
 
     @GetMapping("/by-birth-range")
-    List<FullUserDto> searchByBirthRange(@RequestParam LocalDate from, @RequestParam LocalDate to) {
+    List<FullUserDto> searchByBirthRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         if (from.isAfter(to))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid birth range");
         return repository.getAllByBirthDateRange(from, to).stream().map(mapper::toDto).toList();
     }
 
     private boolean ageValidation(CreateUserDto userDto) {
-        int userYears = Period.between(userDto.birthDate(), LocalDate.now()).getYears();
+        int userYears = Period.between(userDto.birthDate(), LocalDate.now().plusDays(1)).getYears();
         if (userYears <= ageLimit) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User age is less then " + ageLimit);
