@@ -1,10 +1,11 @@
 # test assignment
 
+In addition to the basic requirements, has been added validation to input `phoneNumber` format and restriction to save users with same `email`.
 
 **Endpoints**
 - POST /users
-- PATCH /users
-- PUT /users
+- PATCH /users/{id}
+- PUT /users/{id}
 - DELETE /users/{id}
 - GET /users/by-birth-range
 
